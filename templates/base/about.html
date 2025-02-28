@@ -1,0 +1,24 @@
+{% extends "base/base.html" %}
+
+{% block title %}About Us - My Blog{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center mb-4">About Us</h1>
+    <div class="card shadow-lg p-4">
+        <p>Welcome to <strong>My Blog</strong>, a platform where we share insightful articles, ideas, and stories. Our mission is to provide valuable content to inspire and educate our readers.</p>
+        
+        <h3>Our Vision</h3>
+        <p>We aim to create a community of passionate writers and readers who love sharing knowledge and experiences.</p>
+
+        <h3>Meet the Team</h3>
+        <ul>
+            <li><strong>Founder: </strong>Sabbella Bhagya Sai Anil Reddy</li>
+            <li><strong>Editor: </strong>Anil</li>
+            <li><strong>Contributors: </strong>Passionate writers from around the world</li>
+        </ul>
+
+        <p>Thank you for being part of our journey! Feel free to <a href="{% url 'contact' %}">contact us</a> for any inquiries.</p>
+    </div>
+</div>
+{% endblock %}

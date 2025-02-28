@@ -1,0 +1,57 @@
+{% extends "base/base.html" %}
+
+{% block title %}{{ profile.user.username }}'s Profile - My Blog{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center">
+                    <!-- Profile Picture -->
+                    <div class="mb-3">
+                        {% if profile.profile_picture %}
+                            <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" class="rounded-circle shadow" width="120" height="120">
+                        {% else %}
+                            <img src="https://via.placeholder.com/120" class="rounded-circle shadow" alt="Default Profile Picture">
+                        {% endif %}
+                    </div>
+
+                    <!-- User Info -->
+                    <h2 class="fw-bold">{{ profile.user.username|capfirst}}</h2>
+                    <p class="text-muted">@{{ profile.user.username }}</p>
+                    <p class="fst-italic">{{ profile.bio|default:"No bio added yet." }}</p>
+
+                    {% if profile.user == request.user %}
+                    <a href="{% url 'edit_profile' profile.user.username %}" class="btn btn-outline-primary btn-sm">Edit Profile</a>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Posts Section -->
+    <h3 class="mt-5 text-center">Recent Posts</h3>
+    {% if posts %}
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            {% for post in posts %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ post.title }}</h5>
+                            <p class="text-muted small">{{ post.created_at|date:"F d, Y" }}</p>
+                            <p class="card-text">{{ post.content|truncatewords:20 }}</p>
+                        </div>
+                        <div class="card-footer text-end bg-white">
+                            <a href="{% url 'post_detail' post.id %}" class="btn btn-sm btn-primary">Read More</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-muted mt-3">No posts yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

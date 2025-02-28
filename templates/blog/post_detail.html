@@ -1,0 +1,98 @@
+{% extends "base/base.html" %}
+
+{% block title %}{{ post.title }} - My Blog{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1>{{ post.title }}</h1>
+    <p class="text-muted">By {{ post.author }} | {{ post.created_at|date:"F d, Y" }}</p>
+    <p>{{ post.content }}</p>
+    
+    <h3 class="mt-4">Comments</h3>
+    
+    <!-- Add Comment Form -->
+    <form method="post">
+        {% csrf_token %}
+        <textarea name="content" class="form-control" rows="2" required placeholder="Write a comment..."></textarea>
+        <button type="submit" class="btn btn-primary mt-2">Add Comment</button>
+    </form>
+
+    <!-- Comments Section -->
+    <ul class="list-group mt-3">
+        {% for comment in comments %}
+        <li class="list-group-item">
+            <strong>{{ comment.author }}</strong> - {{ comment.comment_content }}
+            <small class="text-muted">{{ comment.created_at }}</small>
+
+            <!-- Like & Dislike Buttons -->
+            <button class="btn btn-sm btn-outline-success like-btn" data-comment-id="{{ comment.id }}">
+                👍 <span class="like-count">{{ comment.likes }}</span>
+            </button>
+            <button class="btn btn-sm btn-outline-danger dislike-btn" data-comment-id="{{ comment.id }}">
+                👎 <span class="dislike-count">{{ comment.dislikes }}</span>
+            </button>
+
+            <!-- Reply Button -->
+            <a href="#" class="reply-link text-primary" data-comment-id="{{ comment.id }}">Reply</a>
+
+            <!-- Reply Form (Initially Hidden) -->
+            <form method="post" class="reply-form d-none mt-2">
+                {% csrf_token %}
+                <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                <textarea name="content" class="form-control" rows="2"></textarea>
+                <button type="submit" class="btn btn-sm btn-success mt-1">Reply</button>
+            </form>
+
+            <!-- Nested Replies -->
+            <ul class="list-group mt-2">
+                {% for reply in comment.replies.all %}
+                <li class="list-group-item">
+                    <strong>{{ reply.author }}</strong> - {{ reply.comment_content }}
+                    <small class="text-muted">{{ reply.created_at }}</small>
+                </li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- JavaScript for Like/Dislike Actions -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".like-btn, .dislike-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let commentId = this.dataset.commentId;
+                let action = this.classList.contains("like-btn") ? "like" : "dislike";
+                let url = `/comment/${commentId}/${action}/`;
+
+                fetch(url, { 
+                    method: "POST", 
+                    headers: { 
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector(`.like-btn[data-comment-id="${commentId}"] .like-count`).textContent = data.likes;
+                    document.querySelector(`.dislike-btn[data-comment-id="${commentId}"] .dislike-count`).textContent = data.dislikes;
+                });
+            });
+        });
+    });
+</script>
+
+<!-- JavaScript to Toggle Reply Form -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".reply-link").forEach(link => {
+            link.addEventListener("click", function (event) {
+                event.preventDefault();
+                this.nextElementSibling.classList.toggle("d-none");
+            });
+        });
+    });
+</script>
+
+{% endblock %}

@@ -32,6 +32,8 @@ class Comment(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name="replies")
     likes = models.IntegerField(default=0)
     dislikes = models.IntegerField(default=0)
+    liked_by = models.ManyToManyField(User, related_name="liked_comments", blank=True)
+    disliked_by = models.ManyToManyField(User, related_name="disliked_comments", blank=True)
 
     def __str__(self):
         return f'Comment by {self.author} on {self.post.title}'

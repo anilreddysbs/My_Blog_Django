@@ -199,21 +199,50 @@ def contact(request):
 
 from django.http import JsonResponse
 
+@login_required
 def like_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
+    user = request.user
 
     if request.method == "POST":
-        comment.likes += 1
+        if user in comment.liked_by.all():
+            # If already liked, remove like
+            comment.liked_by.remove(user)
+            comment.likes -= 1
+        else:
+            # Add like and remove dislike if present
+            comment.liked_by.add(user)
+            comment.likes += 1
+            if user in comment.disliked_by.all():
+                comment.disliked_by.remove(user)
+                comment.dislikes -= 1
+        
         comment.save()
-        return JsonResponse({"likes": comment.likes, "dislikes": comment.dislikes})
+    
+    return JsonResponse({"likes": comment.likes, "dislikes": comment.dislikes})
 
+@login_required
 def dislike_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
+    user = request.user
 
     if request.method == "POST":
-        comment.dislikes += 1
+        if user in comment.disliked_by.all():
+            # If already disliked, remove dislike
+            comment.disliked_by.remove(user)
+            comment.dislikes -= 1
+        else:
+            # Add dislike and remove like if present
+            comment.disliked_by.add(user)
+            comment.dislikes += 1
+            if user in comment.liked_by.all():
+                comment.liked_by.remove(user)
+                comment.likes -= 1
+        
         comment.save()
-        return JsonResponse({"likes": comment.likes, "dislikes": comment.dislikes})
+
+    return JsonResponse({"likes": comment.likes, "dislikes": comment.dislikes})
+
    
 def posts_by_tag(request, tag_name):
     posts = Post.objects.filter(tags__icontains=tag_name)
